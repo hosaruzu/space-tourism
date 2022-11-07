@@ -12,12 +12,12 @@
   --clr-white: 0deg 0% 100%;
 
   /* fonts-sizes */
-  --fs-900: 9.375rem;
-  --fs-800: 6.25rem;
-  --fs-700: 3.5rem;
-  --fs-600: 2rem;
+  --fs-900: clamp(5rem, 8vw + 1rem, 9.375rem);
+  --fs-800: 3.5rem;
+  --fs-700: 1.5rem;
+  --fs-600: 1rem;
   --fs-500: 1.75rem;
-  --fs-400: 1.125rem;
+  --fs-400: 0.9375rem;
   --fs-300: 1rem;
   --fs-200: 0.875rem;
 
@@ -25,6 +25,24 @@
   --ff-serif: 'Bellefair', serif;
   --ff-sans-cond: 'Barlow Condensed', sans-serif;
   --ff-sans-normal: 'Barlow', sans-serif;
+}
+
+@media (min-width: 35em) {
+  :root {
+    --fs-800: 5rem;
+    --fs-700: 2.5rem;
+    --fs-600: 1.5rem;
+    --fs-400: 1rem;
+  }
+}
+
+@media (min-width: 45em) {
+  :root {
+    --fs-800: 6.25rem;
+    --fs-700: 3.5rem;
+    --fs-600: 2rem;
+    --fs-400: 1.125rem;
+  }
 }
 
 /* ------------ */
@@ -79,13 +97,17 @@ html:focus-within {
 
 /* Set core body defaults */
 body {
+  display: grid;
+  grid-template-rows: min-content 1fr;
+  overflow-x: hidden;
   min-height: 100vh;
   font-family: var(--ff-sans-normal);
   font-size: var(--fs-400);
   line-height: 1.5;
   text-rendering: optimizespeed;
   color: hsl(var(--clr-white));
-  background-color: hsl(var(--clr-dark));
+  background-position: bottom center;
+  background-size: cover;
 }
 
 /* A elements that don't have a class get default styles */
@@ -138,6 +160,10 @@ select {
   gap: var(--gap, 1rem);
 }
 
+.d-block {
+  display: block;
+}
+
 .flow > *:where(:not(:first-child)) {
   margin-top: var(--flow-space, 1rem);
 }
@@ -146,6 +172,38 @@ select {
   max-width: 80rem;
   margin-inline: auto;
   padding-inline: 2em;
+}
+
+.grid-container {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding-inline: 1rem;
+}
+
+.grid-container * {
+  max-width: 50ch;
+}
+
+@media (min-width: 45em) {
+  .grid-container {
+    column-gap: var(--container-gap, 2rem);
+    grid-template-columns: minmax(1rem, 1fr) repeat(2, minmax(0, 30rem)) minmax(1rem, 1fr);
+    text-align: left;
+  }
+
+  .grid-container > *:first-child {
+    grid-column: 2;
+  }
+
+  .grid-container > *:last-child {
+    grid-column: 3;
+  }
+
+  .grid-container--home {
+    align-items: end;
+    padding-bottom: max(6rem, 20vh);
+  }
 }
 
 .sr-only {
@@ -158,6 +216,21 @@ select {
   height: 1px;
   white-space: nowrap;
   clip: rect(0, 0, 0, 0);
+}
+
+.skip-to-content {
+  position: absolute;
+  z-index: 9999;
+  padding: 0.5em 1em;
+  color: hsl(var(--clr-dark) / 95%);
+  background: hsl(var(--clr-white));
+  transform: translateY(-100%);
+  transition: transform 250ms ease-in-out;
+  margin-inline: auto;
+}
+
+.skip-to-content:focus {
+  transform: translateY(0);
 }
 
 .box {
@@ -280,10 +353,11 @@ select {
 .large-button {
   position: relative;
   z-index: 1;
-  display: grid;
+  display: inline-grid;
   place-items: center;
   border-radius: 50%;
   padding: 0 2em;
+  font-size: 2rem;
   text-decoration: none;
   aspect-ratio: 1;
 }
@@ -306,13 +380,25 @@ select {
   transform: scale(1.5);
 }
 
+/* primary-header */
+
+.logo {
+  margin: 1.5rem clamp(1.5rem, 5vw, 3.5rem);
+}
+
+.primary-header {
+  align-items: center;
+  justify-content: space-between;
+}
+
 .primary-navigation {
-  --gap: 8rem;
   --underline-gap: 2rem;
+  --gap: clamp(1.5rem, 5vw, 3.5rem);
 
   list-style: none;
   margin: 0;
   padding: 0;
+  background-color: hsl(var(--clr-dark) / 95%);
 }
 
 .primary-navigation a {
@@ -322,6 +408,99 @@ select {
 .primary-navigation a > span {
   margin-right: 0.5em;
   font-weight: 700;
+}
+
+.mobile-nav-toggle {
+  display: none;
+}
+
+@supports (backdrop-filter: blur(1.5rem)) {
+  .primary-navigation {
+    background-color: hsl(var(--clr-white) / 5%);
+    backdrop-filter: blur(1.5rem);
+  }
+}
+
+@media (max-width: 35rem) {
+  .primary-navigation {
+    --underline-gap: 0.5rem;
+
+    position: fixed;
+    z-index: 1000;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: min(20rem, 15vh) 2rem;
+    transform: translateX(200%);
+    transition: transform 500ms ease-in-out;
+    inset: 0 0 0 30%;
+  }
+
+  .primary-navigation[data-visible='true'] {
+    transform: translateX(0);
+  }
+
+  .primary-navigation.underline-indicators > .active {
+    border: 0;
+  }
+
+  .mobile-nav-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 2rem;
+    z-index: 2000;
+    display: block;
+    border: 0;
+    width: 1.5rem;
+    background: transparent;
+    background-image: url('./assets/shared/icon-hamburger.svg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    aspect-ratio: 1;
+  }
+
+  .mobile-nav-toggle[aria-expanded='true'] {
+    background-image: url('./assets/shared/icon-close.svg');
+  }
+
+  .mobile-nav-toggle:focus-visible {
+    outline: 5px solid white;
+    outline-offset: 5px;
+  }
+}
+
+@media (min-width: 35em) {
+  .primary-navigation {
+    padding-inline: clamp(3rem, 7vw, 6rem);
+  }
+}
+
+@media (min-width: 35em) and (max-width: 44.999em) {
+  .primary-navigation a > span {
+    display: none;
+  }
+}
+
+@media (min-width: 45em) {
+  .primary-header::before {
+    content: '';
+    position: relative;
+    z-index: 10;
+    display: block;
+    order: 1;
+    margin-right: -2.5rem;
+    width: 100%;
+    height: 1px;
+    background-color: hsl(var(--clr-white) / 25%);
+  }
+
+  nav {
+    order: 2;
+  }
+
+  .primary-navigation {
+    margin-block: 2rem;
+  }
 }
 
 .underline-indicators > * {
@@ -384,4 +563,24 @@ select {
   border-color: hsl(var(--clr-white) / 100%);
   color: hsl(var(--clr-dark));
   background-color: hsl(var(--clr-white) / 100%);
+}
+
+/* Page specific backgrounds */
+
+/* *home* */
+.home {
+  background-image: url('./assets/home/background-home-mobile.jpg');
+}
+
+@media (min-width: 35em) {
+  .home {
+    background-image: url('./assets/home/background-home-tablet.jpg');
+    background-position: center center;
+  }
+}
+
+@media (min-width: 45em) {
+  .home {
+    background-image: url('./assets/home/background-home-desktop.jpg');
+  }
 }
